@@ -18,8 +18,14 @@
         }
         .meal-card { transition: all 0.3s ease; }
         .meal-card.active { border-left: 4px solid #F97316; background-color: #FFF7ED; }
+        .nav-btn {
+            padding: 0.75rem 0.5rem; /* Increased vertical padding for better tap area */
+            font-size: 0.875rem;
+            transition: color 0.2s, border-bottom 0.2s;
+        }
         .nav-btn.active { border-bottom: 2px solid #F97316; color: #F97316; font-weight: 600; }
         .hidden-section { display: none; }
+        
         /* Custom scrollbar for ingredient lists */
         .custom-scroll::-webkit-scrollbar { width: 4px; }
         .custom-scroll::-webkit-scrollbar-track { background: #f1f1f1; }
@@ -30,28 +36,30 @@
 
     <!-- Navigation -->
     <nav class="bg-white shadow-sm sticky top-0 z-50">
-        <div class="max-w-4xl mx-auto px-4">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
                 <div class="flex items-center">
                     <span class="text-xl font-bold text-gray-800 tracking-tight">SHRED<span class="text-orange-500">2026</span></span>
                 </div>
-                <div class="flex space-x-4 items-center">
-                    <button id="nav-plan" class="nav-btn active px-3 py-2 text-sm" onclick="switchTab('plan')">Daily Plan</button>
-                    <button id="nav-rotations" class="nav-btn px-3 py-2 text-sm" onclick="switchTab('rotations')">Rotations</button>
-                    <button id="nav-workout" class="nav-btn px-3 py-2 text-sm" onclick="switchTab('workout')">Workout</button>
+                <!-- Navigation buttons adjusted for better mobile spacing -->
+                <div class="flex space-x-1 items-center">
+                    <button id="nav-plan" class="nav-btn active" onclick="switchTab('plan')">Daily Plan</button>
+                    <button id="nav-rotations" class="nav-btn" onclick="switchTab('rotations')">Rotations</button>
+                    <button id="nav-workout" class="nav-btn" onclick="switchTab('workout')">Workout</button>
                 </div>
             </div>
         </div>
     </nav>
 
     <!-- Main Content Area -->
-    <main class="flex-grow max-w-4xl mx-auto px-4 py-6 w-full space-y-6">
+    <main class="flex-grow max-w-4xl mx-auto px-4 sm:px-6 py-6 w-full space-y-6">
 
         <!-- Top Summary Section -->
-        <section class="bg-white rounded-xl shadow-sm p-6">
+        <section class="bg-white rounded-xl shadow-sm p-4 sm:p-6">
             <h2 class="text-lg font-semibold text-gray-800 mb-2">Current Objective: <span class="text-orange-600">The Shred & Heal Protocol</span></h2>
             <p class="text-sm text-gray-600 mb-4">Target: 78-80kg by March 2026. Managing Dyslipidemia via diet.</p>
             
+            <!-- Grid automatically stacks on small screens (grid-cols-1) -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                 <div class="bg-orange-50 p-3 rounded-lg border border-orange-100">
                     <div class="font-bold text-orange-700 mb-1">🔥 2100 Kcal Target</div>
@@ -70,20 +78,21 @@
 
         <!-- VIEW 1: Interactive Daily Planner -->
         <div id="view-plan" class="space-y-6">
-            <div class="bg-white rounded-xl shadow-sm p-6">
+            <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6">
                 <div class="mb-4">
                     <h3 class="text-lg font-bold text-gray-800">Today's Timeline</h3>
                     <p class="text-xs text-gray-500">Select your Lunch and Dinner options to generate your prep list.</p>
                 </div>
 
-                <div class="space-y-4 relative border-l-2 border-gray-100 ml-3 pl-6 pb-2" id="timeline-container">
+                <!-- Timeline structure optimized for mobile vertical flow -->
+                <div class="space-y-4 relative border-l-2 border-gray-100 ml-3 pl-4 sm:pl-6 pb-2" id="timeline-container">
                     <!-- Timeline Items injected by JS -->
                 </div>
             </div>
 
-            <!-- Macro Chart Section -->
+            <!-- Macro Chart Section - Stacks on mobile -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="bg-white rounded-xl shadow-sm p-6">
+                <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6">
                     <h3 class="text-md font-bold text-gray-800 mb-4">Daily Macro Targets</h3>
                     <div class="chart-container">
                         <canvas id="macroChart"></canvas>
@@ -92,7 +101,7 @@
                         High Protein (35%) is crucial for preserving muscle while in a calorie deficit.
                     </div>
                 </div>
-                <div class="bg-white rounded-xl shadow-sm p-6 flex flex-col justify-center space-y-4">
+                <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6 flex flex-col justify-center space-y-4">
                     <h3 class="text-md font-bold text-gray-800">Critical Reminders</h3>
                     <ul class="space-y-3 text-sm text-gray-600">
                         <li class="flex items-start">
@@ -118,19 +127,21 @@
 
         <!-- VIEW 2: Rotations Explorer -->
         <div id="view-rotations" class="hidden-section space-y-6">
-            <div class="bg-white rounded-xl shadow-sm p-6">
-                <div class="flex flex-col md:flex-row justify-between items-center mb-6">
-                    <div>
+            <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6">
+                <!-- Flex direction ensures stacking on small screens -->
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+                    <div class="mb-4 md:mb-0">
                         <h3 class="text-lg font-bold text-gray-800">Meal Rotation Gallery</h3>
                         <p class="text-sm text-gray-500">Explore all approved options for variety.</p>
                     </div>
-                    <div class="flex space-x-2 mt-4 md:mt-0">
+                    <div class="flex space-x-2">
                         <button class="px-3 py-1 text-xs rounded-full bg-orange-100 text-orange-700 border border-orange-200" onclick="filterRotations('all')">All</button>
                         <button class="px-3 py-1 text-xs rounded-full bg-gray-100 text-gray-600 border border-gray-200 hover:bg-gray-200" onclick="filterRotations('Lunch')">Lunch</button>
                         <button class="px-3 py-1 text-xs rounded-full bg-gray-100 text-gray-600 border border-gray-200 hover:bg-gray-200" onclick="filterRotations('Dinner')">Dinner</button>
                     </div>
                 </div>
                 
+                <!-- Rotation Grid stacks on mobile -->
                 <div id="rotation-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <!-- Rotation Cards injected by JS -->
                 </div>
@@ -139,7 +150,7 @@
 
         <!-- VIEW 3: Workout -->
         <div id="view-workout" class="hidden-section space-y-6">
-            <div class="bg-white rounded-xl shadow-sm p-6">
+            <div class="bg-white rounded-xl shadow-sm p-4 sm:p-6">
                 <h3 class="text-lg font-bold text-gray-800 mb-2">Morning Routine (6:00 AM)</h3>
                 <p class="text-sm text-gray-500 mb-6">Fasted state training to maximize fat oxidation.</p>
 
@@ -200,7 +211,7 @@
     </main>
 
     <footer class="bg-white border-t border-gray-200 mt-8 py-6">
-        <div class="max-w-4xl mx-auto px-4 text-center text-xs text-gray-500">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 text-center text-xs text-gray-500">
             <p>Generated for Shredding & Heart Health Goal 2026.</p>
             <p class="mt-1">Consult with a medical professional before starting intense training.</p>
         </div>
@@ -235,7 +246,7 @@
             { id: "B", name: "Egg Stir-fry", ingredients: "Eggs (2 whole + 2 whites), Mushrooms/Peppers (150g), PLUS Low-Fat Paneer (50g)", prep: "Quickest meal. Use non-stick spray or fraction of oil allowance. Add 50g Paneer/Cottage Cheese to the stir-fry.", isHighFiber: true },
             { id: "C", name: "Tandoori Chicken", ingredients: "Chicken Breast (150g raw), Mix Salad (200g), PLUS Low-Fat Paneer (50g)", prep: "Marinate in low-fat curd. Air-fry/Grill. Add 50g Paneer/Cottage Cheese to the salad or consume separately. Zero Oil needed." },
             { id: "D", name: "Black Bean & Veg", ingredients: "Black Beans (50g dry), Whole Wheat Atta (50g), Carrots, PLUS Low-Fat Paneer (50g)", prep: "Simple onion-tomato base. Add 50g Paneer/Cottage Cheese to the curry. Swap Atta for 50g Besan Chilla optionally.", hasAtta: true, isHighFiber: true },
-            { id: "E", name: "Low-Carb Fish Curry", ingredients: "Tilapia/Mackerel (150g raw), Rice (20g - small), PLUS Low-Fat Paneer (50g)", prep: "Poach fish in thin tomato curry. Rice is optional/small portion. Add 50g Paneer/Cottage Cheese on the side." }, // FIX: Added 'name:' key
+            { id: "E", name: "Low-Carb Fish Curry", ingredients: "Tilapia/Mackerel (150g raw), Rice (20g - small), PLUS Low-Fat Paneer (50g)", prep: "Poach fish in thin tomato curry. Rice is optional/small portion. Add 50g Paneer/Cottage Cheese on the side." }, 
             { id: "F", name: "Tofu Stir-fry", ingredients: "Tofu Firm (150g raw), Broccoli/Cauli (200g), PLUS Low-Fat Paneer (50g)", prep: "Low carb. Pan-sear tofu, stir-fry veggies with soy sauce. Add 50g Paneer/Cottage Cheese on the side.", isHighFiber: true }
         ];
         
@@ -270,8 +281,8 @@
 
                 // Content
                 let contentHTML = `
-                    <div class="flex items-center mb-1">
-                        <span class="text-xs font-mono text-gray-500 w-16">${slot.time}</span>
+                    <div class="flex items-start mb-1">
+                        <span class="text-xs font-mono text-gray-500 w-12 sm:w-16 flex-shrink-0 pt-0.5">${slot.time}</span>
                         <span class="text-lg mr-2">${slot.icon}</span>
                         <h4 class="font-bold text-gray-800 text-sm md:text-base">${slot.title}</h4>
                     </div>
