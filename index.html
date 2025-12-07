@@ -26,6 +26,23 @@
         .nav-btn.active { border-bottom: 2px solid #F97316; color: #F97316; font-weight: 600; }
         .hidden-section { display: none; }
         
+        /* Mobile menu specific styles for full-width buttons */
+        .mobile-nav-btn {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            transition: background-color 0.15s;
+        }
+        .mobile-nav-btn.active {
+            background-color: #FFF7ED;
+            color: #F97316;
+            font-weight: 600;
+        }
+        .mobile-nav-btn:hover { background-color: #F3F4F6; }
+
+
         /* Custom scrollbar for ingredient lists */
         .custom-scroll::-webkit-scrollbar { width: 4px; }
         .custom-scroll::-webkit-scrollbar-track { background: #f1f1f1; }
@@ -38,16 +55,39 @@
     <nav class="bg-white shadow-sm sticky top-0 z-50">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between h-16">
+                <!-- Logo -->
                 <div class="flex items-center">
                     <span class="text-xl font-bold text-gray-800 tracking-tight">SHRED<span class="text-orange-500">2026</span></span>
                 </div>
-                <!-- Navigation buttons adjusted for better mobile spacing -->
-                <div class="flex space-x-1 items-center">
+
+                <!-- Desktop Nav (Visible on md+) -->
+                <div class="hidden md:flex space-x-1 items-center">
                     <button id="nav-plan" class="nav-btn active" onclick="switchTab('plan')">Daily Plan</button>
                     <button id="nav-rotations" class="nav-btn" onclick="switchTab('rotations')">Rotations</button>
                     <button id="nav-workout" class="nav-btn" onclick="switchTab('workout')">Workout</button>
                 </div>
+
+                <!-- Mobile Menu Button (Hidden on md) -->
+                <div class="flex items-center md:hidden">
+                    <button id="menu-toggle" onclick="toggleMenu()" class="p-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-orange-500">
+                        <!-- Hamburger Icon -->
+                        <svg id="icon-open" class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                        <!-- Close Icon -->
+                        <svg id="icon-close" class="h-6 w-6 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
             </div>
+        </div>
+        
+        <!-- Mobile Menu Panel (Hidden by default, shown on click) -->
+        <div id="mobile-menu" class="hidden md:hidden px-2 pt-2 pb-3 space-y-1 sm:px-3 border-t border-gray-100">
+            <button id="mobile-nav-plan" class="mobile-nav-btn active text-gray-800" onclick="switchTab('plan', true)">Daily Plan</button>
+            <button id="mobile-nav-rotations" class="mobile-nav-btn text-gray-800" onclick="switchTab('rotations', true)">Rotations</button>
+            <button id="mobile-nav-workout" class="mobile-nav-btn text-gray-800" onclick="switchTab('workout', true)">Workout</button>
         </div>
     </nav>
 
@@ -252,18 +292,57 @@
         
         // --- UI LOGIC ---
 
-        function switchTab(tabName) {
-            ['plan', 'rotations', 'workout'].forEach(t => {
+        function toggleMenu() {
+            const menu = document.getElementById('mobile-menu');
+            const iconOpen = document.getElementById('icon-open');
+            const iconClose = document.getElementById('icon-close');
+            
+            const isHidden = menu.classList.contains('hidden');
+
+            if (isHidden) {
+                menu.classList.remove('hidden');
+                iconOpen.classList.add('hidden');
+                iconClose.classList.remove('hidden');
+            } else {
+                menu.classList.add('hidden');
+                iconOpen.classList.remove('hidden');
+                iconClose.classList.add('hidden');
+            }
+        }
+
+        function switchTab(tabName, isMobile = false) {
+            const tabs = ['plan', 'rotations', 'workout'];
+            tabs.forEach(t => {
+                // Toggle view content
                 document.getElementById(`view-${t}`).style.display = (t === tabName) ? 'block' : 'none';
-                const btn = document.getElementById(`nav-${t}`);
-                if (t === tabName) {
-                    btn.classList.add('active');
-                    btn.classList.remove('text-gray-500');
-                } else {
-                    btn.classList.remove('active');
-                    btn.classList.add('text-gray-500');
+
+                // Toggle desktop nav buttons
+                const desktopBtn = document.getElementById(`nav-${t}`);
+                if (desktopBtn) {
+                    if (t === tabName) {
+                        desktopBtn.classList.add('active');
+                        desktopBtn.classList.remove('text-gray-500');
+                    } else {
+                        desktopBtn.classList.remove('active');
+                        desktopBtn.classList.add('text-gray-500');
+                    }
+                }
+
+                // Toggle mobile nav buttons
+                const mobileBtn = document.getElementById(`mobile-nav-${t}`);
+                if (mobileBtn) {
+                    if (t === tabName) {
+                        mobileBtn.classList.add('active');
+                    } else {
+                        mobileBtn.classList.remove('active');
+                    }
                 }
             });
+
+            // If the call came from the mobile menu, close the menu
+            if (isMobile) {
+                toggleMenu();
+            }
         }
 
         function renderTimeline() {
@@ -411,7 +490,8 @@
             renderTimeline();
             renderRotationGrid('all');
             initCharts();
-            switchTab('plan'); // Default view
+            // Initialize view and sync buttons
+            switchTab('plan'); 
         };
 
     </script>
