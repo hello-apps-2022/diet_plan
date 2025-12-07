@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shredding Protocol: Interactive Planner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #F3F4F6; color: #1F2937; }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            height: 300px;
+            margin: 0 auto;
+        }
+        .meal-card { transition: all 0.3s ease; }
+        .meal-card.active { border-left: 4px solid #F97316; background-color: #FFF7ED; }
+        .nav-btn.active { border-bottom: 2px solid #F97316; color: #F97316; font-weight: 600; }
+        .hidden-section { display: none; }
+        /* Custom scrollbar for ingredient lists */
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-track { background: #f1f1f1; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 2px; }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-4xl mx-auto px-4">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <span class="text-xl font-bold text-gray-800 tracking-tight">SHRED<span class="text-orange-500">2026</span></span>
+                </div>
+                <div class="flex space-x-4 items-center">
+                    <button id="nav-plan" class="nav-btn active px-3 py-2 text-sm" onclick="switchTab('plan')">Daily Plan</button>
+                    <button id="nav-rotations" class="nav-btn px-3 py-2 text-sm" onclick="switchTab('rotations')">Rotations</button>
+                    <button id="nav-workout" class="nav-btn px-3 py-2 text-sm" onclick="switchTab('workout')">Workout</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow max-w-4xl mx-auto px-4 py-6 w-full space-y-6">
+
+        <!-- Top Summary Section -->
+        <section class="bg-white rounded-xl shadow-sm p-6">
+            <h2 class="text-lg font-semibold text-gray-800 mb-2">Current Objective: <span class="text-orange-600">The Shred & Heal Protocol</span></h2>
+            <p class="text-sm text-gray-600 mb-4">Target: 78-80kg by March 2026. Managing Dyslipidemia via diet.</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                <div class="bg-orange-50 p-3 rounded-lg border border-orange-100">
+                    <div class="font-bold text-orange-700 mb-1">🔥 2100 Kcal Target</div>
+                    <p class="text-gray-600">Strict deficit. Precision required.</p>
+                </div>
+                <div class="bg-green-50 p-3 rounded-lg border border-green-100">
+                    <div class="font-bold text-green-700 mb-1">🫀 Lipid Strategy</div>
+                    <p class="text-gray-600">Low Saturated Fat. High Soluble Fiber.</p>
+                </div>
+                <div class="bg-blue-50 p-3 rounded-lg border border-blue-100">
+                    <div class="font-bold text-blue-700 mb-1">📏 Cooking Rules</div>
+                    <p class="text-gray-600">Max 1 tsp Olive Oil. No Ghee. No Sugar.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW 1: Interactive Daily Planner -->
+        <div id="view-plan" class="space-y-6">
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <div class="mb-4">
+                    <h3 class="text-lg font-bold text-gray-800">Today's Timeline</h3>
+                    <p class="text-xs text-gray-500">Select your Lunch and Dinner options to generate your prep list.</p>
+                </div>
+
+                <div class="space-y-4 relative border-l-2 border-gray-100 ml-3 pl-6 pb-2" id="timeline-container">
+                    <!-- Timeline Items injected by JS -->
+                </div>
+            </div>
+
+            <!-- Macro Chart Section -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <h3 class="text-md font-bold text-gray-800 mb-4">Daily Macro Targets</h3>
+                    <div class="chart-container">
+                        <canvas id="macroChart"></canvas>
+                    </div>
+                    <div class="mt-4 text-center text-xs text-gray-500">
+                        High Protein (35%) is crucial for preserving muscle while in a calorie deficit.
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm p-6 flex flex-col justify-center space-y-4">
+                    <h3 class="text-md font-bold text-gray-800">Critical Reminders</h3>
+                    <ul class="space-y-3 text-sm text-gray-600">
+                        <li class="flex items-start">
+                            <span class="mr-2 text-red-500">⚠️</span>
+                            <span><strong>No Dates/Dried Fruit:</strong> Excluded due to high Triglycerides (2.20 mmol/L) and added sugar content.</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="mr-2 text-green-500">✅</span>
+                            <span><strong>Nuts:</strong> Strictly 10g. Rotate between Almonds, Walnuts, Pista.</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="mr-2 text-blue-500">💧</span>
+                            <span><strong>Hydration:</strong> 3-4 Liters of water daily.</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="mr-2 text-yellow-500">🍳</span>
+                            <span><strong>Cooking:</strong> Use Air Fryer, Grill, or Boil methods. Max 1tsp Olive Oil.</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW 2: Rotations Explorer -->
+        <div id="view-rotations" class="hidden-section space-y-6">
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <div class="flex flex-col md:flex-row justify-between items-center mb-6">
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-800">Meal Rotation Gallery</h3>
+                        <p class="text-sm text-gray-500">Explore all approved options for variety.</p>
+                    </div>
+                    <div class="flex space-x-2 mt-4 md:mt-0">
+                        <button class="px-3 py-1 text-xs rounded-full bg-orange-100 text-orange-700 border border-orange-200" onclick="filterRotations('all')">All</button>
+                        <button class="px-3 py-1 text-xs rounded-full bg-gray-100 text-gray-600 border border-gray-200 hover:bg-gray-200" onclick="filterRotations('Lunch')">Lunch</button>
+                        <button class="px-3 py-1 text-xs rounded-full bg-gray-100 text-gray-600 border border-gray-200 hover:bg-gray-200" onclick="filterRotations('Dinner')">Dinner</button>
+                    </div>
+                </div>
+                
+                <div id="rotation-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Rotation Cards injected by JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW 3: Workout -->
+        <div id="view-workout" class="hidden-section space-y-6">
+            <div class="bg-white rounded-xl shadow-sm p-6">
+                <h3 class="text-lg font-bold text-gray-800 mb-2">Morning Routine (6:00 AM)</h3>
+                <p class="text-sm text-gray-500 mb-6">Fasted state training to maximize fat oxidation.</p>
+
+                <div class="space-y-4">
+                    <div class="border border-gray-200 rounded-lg p-4 hover:border-orange-300 transition-colors">
+                        <div class="flex justify-between items-center mb-2">
+                            <h4 class="font-bold text-gray-800">Monday</h4>
+                            <span class="text-xs font-mono bg-blue-100 text-blue-800 px-2 py-1 rounded">Upper Push</span>
+                        </div>
+                        <p class="text-sm text-gray-600">Chest, Shoulders, Triceps. High volume (4 sets, 10-12 reps). <br><strong>Finish:</strong> 10 min abs.</p>
+                    </div>
+                    <div class="border border-gray-200 rounded-lg p-4 hover:border-orange-300 transition-colors">
+                        <div class="flex justify-between items-center mb-2">
+                            <h4 class="font-bold text-gray-800">Tuesday</h4>
+                            <span class="text-xs font-mono bg-red-100 text-red-800 px-2 py-1 rounded">Lower Body</span>
+                        </div>
+                        <p class="text-sm text-gray-600">Quads, Hams, Calves. Compound movements (Squats, Lunges). <br><strong>Note:</strong> Most intense session.</p>
+                    </div>
+                    <div class="border border-gray-200 rounded-lg p-4 hover:border-orange-300 transition-colors">
+                        <div class="flex justify-between items-center mb-2">
+                            <h4 class="font-bold text-gray-800">Wednesday</h4>
+                            <span class="text-xs font-mono bg-yellow-100 text-yellow-800 px-2 py-1 rounded">HIIT Cardio</span>
+                        </div>
+                        <p class="text-sm text-gray-600">Treadmill Sprints. 30s Max / 90s Walk. Repeat 8-10 cycles. Total 20-30 mins.</p>
+                    </div>
+                    <div class="border border-gray-200 rounded-lg p-4 hover:border-orange-300 transition-colors">
+                        <div class="flex justify-between items-center mb-2">
+                            <h4 class="font-bold text-gray-800">Thursday</h4>
+                            <span class="text-xs font-mono bg-blue-100 text-blue-800 px-2 py-1 rounded">Upper Pull</span>
+                        </div>
+                        <p class="text-sm text-gray-600">Back, Biceps. Focus on form and contraction. <br><strong>Finish:</strong> 10 min abs.</p>
+                    </div>
+                    <div class="border border-gray-200 rounded-lg p-4 hover:border-orange-300 transition-colors">
+                        <div class="flex justify-between items-center mb-2">
+                            <h4 class="font-bold text-gray-800">Friday</h4>
+                            <span class="text-xs font-mono bg-purple-100 text-purple-800 px-2 py-1 rounded">Full Body</span>
+                        </div>
+                        <p class="text-sm text-gray-600">Compound movements. Deadlifts, Overhead Press. Moderate weight, perfect form.</p>
+                    </div>
+                    <div class="border border-gray-200 rounded-lg p-4 hover:border-orange-300 transition-colors">
+                        <div class="flex justify-between items-center mb-2">
+                            <h4 class="font-bold text-gray-800">Saturday</h4>
+                            <span class="text-xs font-mono bg-green-100 text-green-800 px-2 py-1 rounded">LISS Cardio</span>
+                        </div>
+                        <p class="text-sm text-gray-600">45-60 mins brisk walk on Treadmill/Outdoor. HR at 60-70% Max.</p>
+                    </div>
+                    <div class="border border-gray-200 rounded-lg p-4 bg-gray-50 opacity-75">
+                        <div class="flex justify-between items-center mb-2">
+                            <h4 class="font-bold text-gray-500">Sunday</h4>
+                            <span class="text-xs font-mono bg-gray-200 text-gray-600 px-2 py-1 rounded">Rest</span>
+                        </div>
+                        <p class="text-sm text-gray-500">Active recovery. Stretching, foam rolling.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="bg-white border-t border-gray-200 mt-8 py-6">
+        <div class="max-w-4xl mx-auto px-4 text-center text-xs text-gray-500">
+            <p>Generated for Shredding & Heart Health Goal 2026.</p>
+            <p class="mt-1">Consult with a medical professional before starting intense training.</p>
+        </div>
+    </footer>
+
+    <script>
+        // --- DATA STORE ---
+        const fixedSchedule = [
+            { time: "5:45 AM", title: "Pre-Workout Fuel", items: ["Black Coffee (1 cup)", "Banana (50g / Half)"], icon: "☕" },
+            { time: "6:00 AM", title: "GYM Session", items: ["HIIT or Resistance Training"], icon: "🏋️" },
+            // UPDATED: Berries replaced with locally affordable, high-fiber fruit options for Kampala
+            { time: "8:00 AM", title: "Post-Workout / Breakfast", items: ["Rolled Oats (50g dry)", "Whey Protein (25g/1 scoop)", "Low-Fat Milk/Water (200ml)", "Seeds/Cocoa (10g/5g)", "Local Fruit Mix (100g - Passion Fruit, Papaya, or Pineapple)"], icon: "🥣" },
+            { time: "11:00 AM", title: "Mid-Morning Snack", items: ["Fruit (Guava/Pear/Orange 150g)", "Nuts (10g - Measure!)"], icon: "🍎" },
+            { time: "1:30 PM", title: "Lunch", type: "rotation", category: "Lunch", icon: "🍛" },
+            { time: "4:30 PM", title: "Pre-Dinner Snack", items: ["Hard-Boiled Egg (1 Whole)", "Whey Protein (12.5g / Half Scoop)"], icon: "🥚" },
+            { time: "8:00 PM", title: "Dinner", type: "rotation", category: "Dinner", icon: "🍽️" }
+        ];
+
+        const lunchRotations = [
+            { id: "A", name: "Lean Chicken & Rice", ingredients: "Chicken Breast (150g raw), Brown Rice/Quinoa (40g dry), Cauliflower (150g)", prep: "Cook chicken in bulk. Flavor rice with stock/turmeric. Max 1 tsp Olive Oil." },
+            { id: "B", name: "Chhole/Channa Masala", ingredients: "Chickpeas (50g dry), Whole Wheat Atta (50g)", prep: "Pressure cook chickpeas. Minimal oil curry. Swap Atta for 50g Besan Chilla optionally.", hasAtta: true },
+            { id: "C", name: "Dal & Veg Pulao", ingredients: "Moong/Masoor Dal (50g dry), Brown Rice (40g dry), Curd (100g)", prep: "Plain thick Dal. Rice cooked with chopped veggies & spices. Max 1 tsp oil." },
+            { id: "D", name: "Soya Chunk Curry", ingredients: "Soya Chunks (50g dry), Whole Wheat Atta (50g)", prep: "Boil soya chunks, simmer in low-oil curry. Swap Atta for 50g Besan Chilla optionally.", hasAtta: true },
+            { id: "E", name: "Fish & Greens", ingredients: "Tilapia/Mackerel (150g raw), Brown Rice (40g dry), Spinach (150g)", prep: "Grill/Bake fish. Sauté spinach with garlic. Lightly seasoned rice." },
+            { id: "F", name: "Green Gram Delight", ingredients: "Green Gram (50g dry), Whole Wheat Atta (50g)", prep: "Thick seasoned Dal. Serve with Roti/Chilla. Swap Atta for 50g Besan Chilla optionally.", hasAtta: true },
+            { id: "G", name: "Tofu & Rice", ingredients: "Tofu Firm (150g raw), Brown Rice (40g dry), Stir-fry Veg (150g)", prep: "Press water from Tofu. Cube and pan-fry in spicy sauce. Max 1 tsp oil." },
+            { id: "H", name: "Low-Fat Paneer", ingredients: "Low-Fat Paneer (150g raw), Whole Wheat Atta (50g)", prep: "Palak Paneer style. Measure oil strictly. Swap Atta for 50g Besan Chilla optionally.", hasAtta: true }
+        ];
+
+        const dinnerRotations = [
+            { id: "A", name: "Rajma & Roti", ingredients: "Kidney Beans (50g dry), Whole Wheat Atta (50g), PLUS Low-Fat Paneer (50g)", prep: "Bulk cook Rajma. Serve with Roti/Chilla. Add 50g Paneer/Cottage Cheese to the meal. Swap Atta for 50g Besan Chilla optionally.", hasAtta: true },
+            { id: "B", name: "Egg Stir-fry", ingredients: "Eggs (2 whole + 2 whites), Mushrooms/Peppers (150g), PLUS Low-Fat Paneer (50g)", prep: "Quickest meal. Use non-stick spray or fraction of oil allowance. Add 50g Paneer/Cottage Cheese to the stir-fry.", isHighFiber: true },
+            { id: "C", name: "Tandoori Chicken", ingredients: "Chicken Breast (150g raw), Mix Salad (200g), PLUS Low-Fat Paneer (50g)", prep: "Marinate in low-fat curd. Air-fry/Grill. Add 50g Paneer/Cottage Cheese to the salad or consume separately. Zero Oil needed." },
+            { id: "D", name: "Black Bean & Veg", ingredients: "Black Beans (50g dry), Whole Wheat Atta (50g), Carrots, PLUS Low-Fat Paneer (50g)", prep: "Simple onion-tomato base. Add 50g Paneer/Cottage Cheese to the curry. Swap Atta for 50g Besan Chilla optionally.", hasAtta: true, isHighFiber: true },
+            { id: "E", name: "Low-Carb Fish Curry", ingredients: "Tilapia/Mackerel (150g raw), Rice (20g - small), PLUS Low-Fat Paneer (50g)", prep: "Poach fish in thin tomato curry. Rice is optional/small portion. Add 50g Paneer/Cottage Cheese on the side." }, // FIX: Added 'name:' key
+            { id: "F", name: "Tofu Stir-fry", ingredients: "Tofu Firm (150g raw), Broccoli/Cauli (200g), PLUS Low-Fat Paneer (50g)", prep: "Low carb. Pan-sear tofu, stir-fry veggies with soy sauce. Add 50g Paneer/Cottage Cheese on the side.", isHighFiber: true }
+        ];
+        
+        // --- UI LOGIC ---
+
+        function switchTab(tabName) {
+            ['plan', 'rotations', 'workout'].forEach(t => {
+                document.getElementById(`view-${t}`).style.display = (t === tabName) ? 'block' : 'none';
+                const btn = document.getElementById(`nav-${t}`);
+                if (t === tabName) {
+                    btn.classList.add('active');
+                    btn.classList.remove('text-gray-500');
+                } else {
+                    btn.classList.remove('active');
+                    btn.classList.add('text-gray-500');
+                }
+            });
+        }
+
+        function renderTimeline() {
+            const container = document.getElementById('timeline-container');
+            container.innerHTML = '';
+
+            fixedSchedule.forEach((slot, index) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'relative pl-4 pb-4';
+                
+                // Dot
+                const dot = document.createElement('div');
+                dot.className = 'absolute -left-[9px] top-1 h-4 w-4 rounded-full bg-white border-2 border-orange-400';
+                itemDiv.appendChild(dot);
+
+                // Content
+                let contentHTML = `
+                    <div class="flex items-center mb-1">
+                        <span class="text-xs font-mono text-gray-500 w-16">${slot.time}</span>
+                        <span class="text-lg mr-2">${slot.icon}</span>
+                        <h4 class="font-bold text-gray-800 text-sm md:text-base">${slot.title}</h4>
+                    </div>
+                `;
+
+                if (slot.type === 'rotation') {
+                    // Dropdown for rotation
+                    const options = slot.category === 'Lunch' ? lunchRotations : dinnerRotations;
+                    contentHTML += `
+                        <div class="bg-orange-50 rounded-lg p-3 mt-1 border border-orange-100">
+                            <label class="text-xs font-bold text-orange-800 block mb-2 uppercase tracking-wide">Select ${slot.category} Option</label>
+                            <select class="w-full p-2 border border-orange-200 rounded text-sm bg-white mb-3 focus:outline-none focus:ring-2 focus:ring-orange-300" onchange="updateRotationDetails(this.value, '${slot.category}', ${index})">
+                                <option value="" disabled selected>-- Choose Meal --</option>
+                                ${options.map(opt => `<option value="${opt.id}">${opt.id}: ${opt.name}</option>`).join('')}
+                            </select>
+                            <div id="details-${slot.category}-${index}" class="hidden text-sm text-gray-700 space-y-2">
+                                <!-- Details injected here -->
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // Fixed items list
+                    contentHTML += `
+                        <ul class="text-sm text-gray-600 list-disc ml-6 space-y-1">
+                            ${slot.items.map(i => `<li>${i}</li>`).join('')}
+                        </ul>
+                    `;
+                }
+
+                itemDiv.innerHTML += contentHTML;
+                container.appendChild(itemDiv);
+            });
+        }
+
+        function updateRotationDetails(id, category, index) {
+            const container = document.getElementById(`details-${category}-${index}`);
+            const options = category === 'Lunch' ? lunchRotations : dinnerRotations;
+            const meal = options.find(m => m.id === id);
+
+            if (meal) {
+                let attaToggle = '';
+                if (meal.hasAtta) {
+                    attaToggle = `
+                        <div class="mt-2 p-2 bg-yellow-50 border border-yellow-100 rounded text-xs">
+                            <span class="font-bold text-yellow-800">🔄 Swap Tip:</span> 
+                            You can swap the <span class="font-semibold">50g Atta</span> for <span class="font-semibold">50g Chickpea Flour (Besan)</span> to make a high-protein Chilla.
+                        </div>
+                    `;
+                }
+                
+                let fiberNote = '';
+                if (meal.isHighFiber && category === 'Dinner') {
+                     fiberNote = `
+                        <p class="mt-1 text-green-700 font-semibold">🌱 Fiber Focus: This option is naturally high in soluble fiber, which is beneficial for your lipid goals.</p>
+                     `;
+                }
+
+                container.innerHTML = `
+                    <div class="border-t border-orange-200 pt-2 mt-2">
+                        <p><strong>🛒 Ingredients:</strong> ${meal.ingredients}</p>
+                        <p class="mt-1"><strong>👨‍🍳 Prep:</strong> ${meal.prep}</p>
+                        ${fiberNote}
+                        ${attaToggle}
+                    </div>
+                `;
+                container.classList.remove('hidden');
+            }
+        }
+
+        function renderRotationGrid(filter) {
+            const grid = document.getElementById('rotation-grid');
+            grid.innerHTML = '';
+            
+            const allMeals = [
+                ...lunchRotations.map(m => ({...m, type: 'Lunch'})),
+                ...dinnerRotations.map(m => ({...m, type: 'Dinner'}))
+            ];
+
+            const filtered = filter === 'all' ? allMeals : allMeals.filter(m => m.type === filter);
+
+            filtered.forEach(meal => {
+                const card = document.createElement('div');
+                card.className = 'bg-white border border-gray-100 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow';
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-xs font-bold px-2 py-1 rounded ${meal.type === 'Lunch' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'}">${meal.type} ${meal.id}</span>
+                        ${meal.hasAtta ? '<span class="text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded" title="Wheat/Besan Swap Available">🔄 Swap</span>' : ''}
+                        ${(meal.isHighFiber && meal.type === 'Dinner') ? '<span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded" title="High Soluble Fiber Focus">🌱 Fiber</span>' : ''}
+                    </div>
+                    <h4 class="font-bold text-gray-800 mb-2">${meal.name}</h4>
+                    <p class="text-xs text-gray-600 mb-2"><strong>Ing:</strong> ${meal.ingredients}</p>
+                    <p class="text-xs text-gray-500 italic">${meal.prep}</p>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function filterRotations(type) {
+            renderRotationGrid(type);
+        }
+
+        function initCharts() {
+            const ctx = document.getElementById('macroChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Protein (35%)', 'Fats (25%)', 'Carbs (40%)'],
+                    datasets: [{
+                        data: [35, 25, 40],
+                        backgroundColor: ['#F97316', '#FBBF24', '#3B82F6'], // Orange, Yellow, Blue
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+        }
+
+        // --- INIT ---
+        window.onload = function() {
+            renderTimeline();
+            renderRotationGrid('all');
+            initCharts();
+            switchTab('plan'); // Default view
+        };
+
+    </script>
+</body>
+</html>
